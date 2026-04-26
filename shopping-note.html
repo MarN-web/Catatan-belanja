@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Catatan Belanja</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .list-section {
+            padding: 30px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .list-header h2 {
+            color: #333;
+        }
+
+        .stats {
+            background: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .total-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-section, .list-section {
+                padding: 20px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>🛒 Catatan Belanja</h1>
+                <p>Kelola daftar belanja Anda dengan mudah</p>
+            </div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label>📝 Nama Item</label>
+                    <input type="text" id="namaItem" placeholder="Contoh: Beras, Telur, Minyak Goreng">
+                </div>
+                <div class="form-group">
+                    <label>🔢 Jumlah</label>
+                    <input type="number" id="jumlah" placeholder="Jumlah" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>💰 Harga Satuan (Rp)</label>
+                    <input type="number" id="harga" placeholder="Harga satuan" value="0" min="0">
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="tambahItem()">➕ Tambah Item</button>
+                    <button class="btn-secondary" onclick="resetForm()">🔄 Reset Form</button>
+                </div>
+            </div>
+
+            <div class="list-section">
+                <div class="list-header">
+                    <h2>📋 Daftar Belanja</h2>
+                    <div class="stats" id="jumlahItem">0 item</div>
+                </div>
+                <div id="daftarBelanja">
+                    <div class="empty-state">✨ Belum ada item. Tambahkan item baru! ✨</div>
+                </div>
+                <div id="totalSection" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array untuk menyimpan daftar item
+        let daftarItem = [];
+
+        // Kelas Item
+        class Item {
+            constructor(nama, jumlah, harga) {
+                this.nama = nama;
+                this.jumlah = jumlah;
+                this.harga = harga;
+                this.id = Date.now() + Math.random();
+            }
+
+            getTotal() {
+                return this.jumlah * this.harga;
+            }
+
+            formatRupiah(nilai) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(nilai);
+            }
+
+            toHTML(index) {
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="item-name">${this.escapeHtml(this.nama)}</td>
+                        <td>${this.jumlah} x</td>
+                        <td>${this.formatRupiah(this.harga)}</td>
+                        <td>${this.formatRupiah(this.getTotal())}</td>
+                        <td>
+                            <button class="delete-btn" onclick="hapusItem('${this.id}')">
+                                🗑️ Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Tampilkan notifikasi
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.background = isError ? '#ef4444' : '#10b981';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        // Tambah item baru
+        function tambahItem() {
+            const namaInput = document.getElementById('namaItem');
+            const jumlahInput = document.getElementById('jumlah');
+            const hargaInput = document.getElementById('harga');
+            
+            const nama = namaInput.value.trim();
+            const jumlah = parseInt(jumlahInput.value);
+            const harga = parseFloat(hargaInput.value);
+            
+            // Validasi
+            if (!nama) {
+                showNotification('❌ Nama item tidak boleh kosong!', true);
+                return;
+            }
+            
+            if (isNaN(jumlah) || jumlah < 1) {
+                showNotification('❌ Jumlah harus minimal 1!', true);
+                return;
+            }
+            
+            if (isNaN(harga) || harga < 0) {
+                showNotification('❌ Harga tidak valid!', true);
+                return;
+            }
+            
+            // Buat item baru
+            const itemBaru = new Item(nama, jumlah, harga);
+            daftarItem.push(itemBaru);
+            
+            // Reset form
+            resetForm();
+            
+            // Tampilkan notifikasi
+            showNotification(`✓ ${nama} berhasil ditambahkan!`);
+            
+            // Refresh tampilan
+            tampilkanSemua();
+        }
+        
+        // Hapus item
+        function hapusItem(id) {
+            const item = daftarItem.find(i => i.id == id);
+            if (item) {
+                daftarItem = daftarItem.filter(i => i.id != id);
+                showNotification(`✓ ${item.nama} dihapus dari daftar`);
+                tampilkanSemua();
+            }
+        }
+        
+        // Hapus semua item
+        function hapusSemua() {
+            if (daftarItem.length > 0 && confirm('Yakin ingin menghapus semua item?')) {
+                daftarItem = [];
+                showNotification('✓ Semua item telah dihapus');
+                tampilkanSemua();
+            }
+        }
+        
+        // Hitung total belanja
+        function hitungTotal() {
+            return daftarItem.reduce((total, item) => total + item.getTotal(), 0);
+        }
+        
+        // Format Rupiah
+        function formatRupiah(nilai) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(nilai);
+        }
+        
+        // Tampilkan semua item
+        function tampilkanSemua() {
+            const container = document.getElementById('daftarBelanja');
+            const totalSection = document.getElementById('totalSection');
+            const jumlahItemSpan = document.getElementById('jumlahItem');
+            
+            if (daftarItem.length === 0) {
+                container.innerHTML = '<div class="empty-state">✨ Belum ada item. Tambahkan item baru! ✨</div>';
+                totalSection.style.display = 'none';
+                jumlahItemSpan.textContent = '0 item';
+                return;
+            }
+            
+            // Buat tabel
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Item</th>
+                            <th>Jumlah</th>
+                            <th>Harga Satuan</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            daftarItem.forEach((item, index) => {
+                html += item.toHTML(index);
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+                <div style="margin-top: 15px; text-align: right;">
+                    <button class="btn-danger" onclick="hapusSemua()" style="padding: 8px 20px; width: auto;">
+                        🗑️ Hapus Semua
+                    </button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Tampilkan total section
+            const total = hitungTotal();
+            totalSection.style.display = 'block';
+            totalSection.innerHTML = `
+                <div class="total-section">
+                    <span class="total-label">💰 Total Belanja</span>
+                    <span class="total-amount">${formatRupiah(total)}</span>
+                </div>
+            `;
+            
+            // Update jumlah item
+            jumlahItemSpan.textContent = `${daftarItem.length} item`;
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('namaItem').value = '';
+            document.getElementById('jumlah').value = '1';
+            document.getElementById('harga').value = '';
+            document.getElementById('namaItem').focus();
+        }
+        
+        // Data contoh awal
+        function loadContohData() {
+            const contohItem = [
+                ['Beras', 2, 75000],
+                ['Telur', 12, 2000],
+                ['Minyak Goreng', 1, 18000],
+                ['Gula Pasir', 2, 13000],
+                ['Susu UHT', 3, 12000]
+            ];
+            
+            contohItem.forEach(([nama, jumlah, harga]) => {
+                const item = new Item(nama, jumlah, harga);
+                daftarItem.push(item);
+            });
+            
+            tampilkanSemua();
+            showNotification('✓ Data contoh berhasil dimuat!');
+        }
+        
+        // Event listener untuk tombol Enter
+        function setupEnterKey() {
+            const inputs = ['namaItem', 'jumlah', 'harga'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        tambahItem();
+                    }
+                });
+            });
+        }
+        
+        // Inisialisasi aplikasi
+        function init() {
+            setupEnterKey();
+            loadContohData();
+        }
+        
+        // Jalankan aplikasi
+        init();
+    </script>
+</body>
+</html>
